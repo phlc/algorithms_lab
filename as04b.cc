@@ -7,7 +7,15 @@ Matricula: 651230
 AS04
 
 Análise:
-        
+        O custo custo de criação do grafo é linear, diretamente proporcional ao número de entradas(aresta valor). O método
+        inserir() é chamado tantas vezes quantas forem as entradas.
+        Após montado o grafo, o método custoMinimo() é chamado uma única vez. O primeiro loop de custoMinimo(), "while", repete
+        v-1 vezes, sendo v o número de vértices do grafo.
+        O primeiro "for", dentro do "while", repete v vezes, v sendo o número de vértices.
+        Por fim, o segundo "for", interno ao primeiro, repete a vezes, sendo a o número de arestas incidentes ao vértice em
+        questão.
+        Assim, o algoritmo tem complexidade O(n2 * m), sendo n o número de vértices e m o número de arestas do vértice de maior
+        grau. 
         
 */
 
