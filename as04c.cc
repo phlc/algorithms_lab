@@ -7,8 +7,17 @@ Matricula: 651230
 AS04
 
 Análise:
-        
-        
+        O algoritmo armazena as entradas em três arranjos paralelos. Vert_1[i] e Vert_2[i] contêm os vértices
+        de uma aresta, cujo valor está em Valores[i]. 
+        A criação do grafo com armazenamento das entradas tem complexidade O(n), n o número de linhas de 
+        entrada(arestas+1).
+        Após as arestas são ordenadas utilizando o heapsort, que tem complexidade O(a Lg a), no caso, a é o 
+        número de arestas.
+        Por fim, a custoMinimo() passa novamente por todas arestas, tendo apenas 2 loops internos, while(),
+        que sobem na árvore invertida que armazena vértices conexos. O algoritmo sempre liga uma nova árvore
+        naquela que tem mais filhos, trabalhando em tempo inferior a O(a lg a), sendo a o número de arestas.
+        Assim, o algoritmo tem complexidade O(n lg n), sendo n o número de arestas
+
 */
 
 //Dependencias
@@ -148,7 +157,6 @@ class Grafo{
                 swap(i, maior);
                 heapify(maior, tamanho);
             }
-
         }
 
     public:
@@ -173,18 +181,56 @@ class Grafo{
         }
 
         /*
-        custoMinimo - Verificar o custo mínimo a partir do conceito minimum spanning tree construida a partir 
-        da algoritmo prim
+        custoMinimo - Verificar o custo mínimo a partir do algoritmo de Kruskal em um disjoit set
         @return int -> int custo
+        Obs: para árvore invertida utliza um arranjo[1, número de aresta], sendo que arranjo[i] < 0 indica
+        que aquela aresta é uma raiz e tem |arranjo[i]-1| filhos.
         */
         int custoMinimo(){
             //declarações
             int custo = 0;
-            
+            int pais[n_vertices+1]; //arranho par controle do pais de cada vértice
 
+            //inicialização - cada aresta forma um conjunto unitário
+            for(int i=0; i<=n_vertices; i++){
+                pais[i] = -1;
+            }
+
+            //ordenar os arranjos representativos do grafo
+            heapsort();
+
+            //analisar a inclusão das arestas nos conjuntos da menor para a maior
+            for(int i=1; i<=max_arestas; i++){
+                //declarações locais
+                int raiz_v1 = Vert_1[i];
+                int raiz_v2 = Vert_2[i];
+
+                //obter raizes de Vert_1[i] e Vert_2[i]
+                while(pais[raiz_v1] >= 0){
+                    raiz_v1 = pais[raiz_v1];
+                }
+                while(pais[raiz_v2] >= 0){
+                    raiz_v2 = pais[raiz_v2];
+                }
+
+                //se forem diferentes - não forma ciclo
+                if(raiz_v1 != raiz_v2){
+                    //atualizar custo
+                    custo+=Valores[i];
+
+                    //incluir a que tem menos filhos na árvore que tem mais
+                    if(raiz_v1 < raiz_v2){
+                        pais[raiz_v1] += pais[raiz_v2];
+                        pais[raiz_v2] = raiz_v1;
+                    }
+                    else{
+                        pais[raiz_v2] += pais[raiz_v1];
+                        pais[raiz_v1] = raiz_v2;
+                    }
+                }
+            }
             return custo;
         }
-
 };
 
 /*
@@ -209,13 +255,8 @@ int main(){
         g.inserir(rot1, rot2, custo);
     }
 
-g.mostrar();
-cout << endl;
-g.heapsort();
-g.mostrar();
-
     //calcular e mostrar custo minimo
-//    cout << g.custoMinimo() << endl;
+    cout << g.custoMinimo() << endl;
 
     //return
     return 0;   
