@@ -7,7 +7,16 @@ Matricula: 651230
 AS05
 
 Análise:
-        
+        O algoritmo utiliza uma adaptação do algortimo de busca em profundidade para obter uma arranjo com as raízes
+        de cada spanningtree do grafo. Como a busca é feita sempre a partir do menor vértice, a raiz será sempre o 
+        menor. A busca em produndidade entre em cada vértice apena uma vez, no entanto, testa todos os vértices conectados
+        ao vértice atual. Assim, em que pese entre apenas uma vez em cada vértice, sendo em tese O(n), sendo n o número de
+        vértices, são feitos, no pior caso(grafo completo) n^2 testes, assim O(n^2).
+        Acredito que seria possível uma melhor implementação do DFS, mas a necessidade de se imprimir os vértices de cada
+        elemento conexo em ordem crescente também implica na necessidade de se realizar O(n^2) testes, sendo n o número 
+        de vértices.
+        Esses são os dois momentos mais custos do algoritmo, sendo a inserção e demais métodos mais eficientes, portanto, 
+        desconsiderados na análise.
         
 */
 
