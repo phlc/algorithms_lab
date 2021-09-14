@@ -110,6 +110,21 @@ class Grafo {
             }
         }
 
+        /*
+        menorCaminho - Altera o grafo para constar o menor caminho entre quaisquer dois par de vértices
+        */
+        void menorCaminho(){
+            for(int k=0; k<nVertices; k++){
+                for(int i=0; i<nVertices; i++){
+                    for(int j=0; j<nVertices; j++){
+                        if(matriz[i][j] > (matriz[i][k] + matriz[k][j])){
+                            matriz[i][j] = matriz[i][k] + matriz[k][j];
+                        }
+                    }
+                }
+            }
+        }
+
 };
 
 /*
@@ -145,6 +160,9 @@ int main(){
         }
 
         cout << endl;
+        g.mostrar();
+        cout << endl;
+        g.menorCaminho();
         g.mostrar();
     }
 
