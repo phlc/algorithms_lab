@@ -161,6 +161,8 @@ class Grafo {
             int atual = 0;
             int proximo = 1;
             int visitados[nVertices];
+            int tempos[nVertices-1];
+            int nCaminhamentos = nVertices-2;
 
             //inicialização
             visitados[0] = 1;
@@ -171,28 +173,39 @@ class Grafo {
             //alterar grafo para menor caminho entre quaisquer dos dois vértices
             this->menorCaminho();
 
-            //verificar menor caminho a partir do vértice atual para não visitado   
+            //verificar melhor caminho a partir do vértice atual para não visitado   
             proximo = melhorOpcao(atual, visitados);     
-            while(atual != proximo){
-                //se não tem caminho
-                if(matriz[atual][proximo] == INFINITY){
-                    //se tem teletransporte
-                    if(k>0){
-                        k--;
-                        matriz[atual][proximo] = 0;
-                    }
-                    else{
-                        return -1;
-                    }
-                }
-                //se tem caminho
-                else{
-                    t+=matriz[atual][proximo];
-                    visitados[proximo]=1;
-                    atual = proximo;
-                }
+            while(nCaminhamentos>=0){
+                tempos[nCaminhamentos] = matriz[atual][proximo]; //armazenar tempo melhor caminho
+                visitados[proximo]=1; //marcar próximo vértice como visitado
+                atual = proximo;
+                nCaminhamentos--; 
                 proximo = melhorOpcao(atual, visitados);
             }
+
+            //ordenar tempos de caminhamentos
+            for(int i=1; i<nVertices-1; i++){
+                int j=i-1;
+                while(j>=0 && tempos[i]<tempos[j]){
+                    int buffer = tempos[i];
+                    tempos[i] = tempos[j];
+                    tempos[j] = buffer;
+                }
+            }
+
+            //desconsiderar os k maiores caminhamentos
+            nCaminhamentos = nVertices-2 -k;
+
+            if(tempos[nCaminhamentos] == INFINITY){
+                t=-1;
+            }
+            else{
+                while(nCaminhamentos>=0){
+                    t+=tempos[nCaminhamentos];
+                    nCaminhamentos--;
+                }
+            }
+
             return t;
         }
 
