@@ -28,7 +28,7 @@ matrir(x,y) > 0 -> aresta existente, peso aresta(x,y) = matriz[x][y], max 30000
 */
 class Grafo {
     //Macros
-    #define INFINITY 1000000 // peso máximo da aresta válida é 30000
+    #define INFINITO 1000000 // peso máximo da aresta válida é 30000
 
     //Atributos
     private:
@@ -56,7 +56,7 @@ class Grafo {
                     if (i==j)
                         matriz[i][j] = 0;
                     else
-                        matriz[i][j] = INFINITY;
+                        matriz[i][j] = INFINITO;
                 }
             }
         }
@@ -84,7 +84,8 @@ class Grafo {
             v2--;
 
             //controle parâmetros
-            if(v1>=0 && v1<nVertices && v2>=0 && v2<nVertices){
+            if(v1>=0 && v1<nVertices && v2>=0 && v2<nVertices 
+                    && valor < matriz[v1][v2] && v1!=v2){
 
                 //inserir aresta - grafo não direcionado - caminhamento em ambos sentidos
                 matriz[v1][v2] = valor;
@@ -101,7 +102,7 @@ class Grafo {
         void mostrar(){
             for(int i=0; i<nVertices; i++){
                 for(int j=0; j<nVertices; j++){
-                    if(matriz[i][j] == INFINITY)
+                    if(matriz[i][j] == INFINITO)
                         cout << setw(3) << -1;
                     else
                         cout << setw(3) << matriz[i][j];
@@ -136,7 +137,7 @@ class Grafo {
         */
         int melhorOpcao(int v, int* visitados){
             //declaracoes
-            int menor = INFINITY+1;
+            int menor = INFINITO;
             int p = v;
  
             //verificar menor opção não visitada
@@ -151,6 +152,82 @@ class Grafo {
         }
 
         /*
+        calcularComponentes - Calcula o número de componentes do grafo
+        @param int* componentes -> arranjo para armazenar a qual componente cada vertice pertence
+        @return int -> número de compoenente
+        */
+        int calcularComponentes(int* componentes){
+            //declarações
+            int contador = 0;
+            int nComponentes = 0;
+
+            //analisar todos os vértices
+            while(contador<nVertices){
+
+                //verificar vértices ainda não incluídos em uma componente
+                int vertice = 0;
+                while(componentes[vertice]!=-1){
+                    vertice++;
+                }
+
+                //criar nova componente para o vértice
+                componentes[vertice] = nComponentes;
+                contador++;
+                
+                //verificar todos dos vértices conexos a vertice
+                for(int i=0; i<nVertices; i++){
+                    if(vertice!=i & matriz[vertice][i] != INFINITO){
+                        componentes[i] = nComponentes;
+                        contador++;
+                    }
+                }
+                nComponentes++;
+            }
+            return nComponentes;
+        }
+
+        /*
+        melhorInicio - Em um componente sem vértice de início pré-determinado, escolher o que gera menor tempo
+        @param int c, int* comp -> número do componente, arranjo com o controle de vertices/componente
+        @return int v -> melhor vértice de início
+        */
+        int melhorInicio(int c, int* comp){
+            int v = -1;
+            int tempo = INFINITO;
+            int atual = -1;
+            int proximo = -1;
+
+
+            //testar todos os vértices do componente
+            for(int i=0; i<nVertices; i++){
+                int t = 0;
+                if(comp[i] == c){            
+                    int visit[nVertices]; //controle vértices visitados local
+                    //inicialização
+                    for(int j=0; j<nVertices; j++){
+                        visit[j] = 0;
+                    }
+                    atual = i;
+                    visit[atual] = 1;
+                    proximo = melhorOpcao(i, visit);
+                    while(atual != proximo){
+
+                        t+= matriz[atual][proximo]; //armazenar tempo melhor caminho
+                        visit[proximo]=1; //marcar próximo vértice como visitado
+                        atual = proximo;
+                        proximo = melhorOpcao(atual, visit);
+                    }
+                    //se t melhor que tempo
+                    if(t<tempo){
+                        tempo = t;
+                        v = i;
+                    }
+                }
+            }
+            return v;
+        }
+
+        /*
         caminharPorTodos - Tenta caminhar por todos os vértices do grafo
         @param int k -> k sendo o número de teletransportes
         @return int t -> t sendo o tempo total gasto para caminhar ou -1 se impossível
@@ -159,30 +236,74 @@ class Grafo {
             //declaracoes
             int t = 0;
             int atual = 0;
-            int proximo = 1;
-            int visitados[nVertices];
+            int proximo = 0;
+            int nComponentes = 0;
+            int nCaminhamentos = 0;
+            int visitados[nVertices]; //controle vértices visitados
+            int componentes[nVertices]; //controle componentes desconexos
             int tempos[nVertices-1];
-            int nCaminhamentos = nVertices-2;
 
             //inicialização
             visitados[0] = 1;
+            componentes[0] = -1; 
             for(int i=1; i<nVertices; i++){
                 visitados[i] = 0;
+                componentes[i] = -1;
+                tempos[i-1] = 0;
             }
 
             //alterar grafo para menor caminho entre quaisquer dos dois vértices
             this->menorCaminho();
 
-            //verificar melhor caminho a partir do vértice atual para não visitado   
-            proximo = melhorOpcao(atual, visitados);     
-            while(nCaminhamentos>=0){
+            //calcular número de componentes
+            nComponentes = calcularComponentes(componentes);
+
+            //verificar se número de teletransportes é suficiente para passsar por todos os componentes
+            if(k < nComponentes-1){
+                return -1;
+            }
+            else{
+                k = k -nComponentes +1; //descontar os teletransportes necessários para pular entre componentes
+                nCaminhamentos = nCaminhamentos +nComponentes -1; //considerar os teletransportes como caminhamentos
+            }
+
+            //criar vetor como o número de vértices de cada componente
+            int verticesPorComponente[nComponentes];
+            for(int i=0; i<nComponentes; i++){
+                verticesPorComponente[i] = 0;
+                for(int j=0; j<nVertices; j++){
+                    if(componentes[j] == i){
+                        verticesPorComponente[i]++;
+                    }
+                }
+            }
+
+            //verificar melhor caminho dentro da componente 0 (vértice inicial pré-determinado)
+            proximo = melhorOpcao(atual, visitados);
+            while(atual != proximo){
                 tempos[nCaminhamentos] = matriz[atual][proximo]; //armazenar tempo melhor caminho
                 visitados[proximo]=1; //marcar próximo vértice como visitado
                 atual = proximo;
-                nCaminhamentos--; 
+                nCaminhamentos++; 
                 proximo = melhorOpcao(atual, visitados);
             }
 
+            //passar pelas demais componentes
+            for(int i=1; i<nComponentes; i++){
+                //verificar melhor vertice de inicio
+                atual = melhorInicio(i, componentes);
+                visitados[atual]=1;
+                //verificar melhor caminho dentro da componente 0 (vértice inicial pré-determinado)
+                proximo = melhorOpcao(atual, visitados);
+                while(atual != proximo){
+                    tempos[nCaminhamentos] = matriz[atual][proximo]; //armazenar tempo melhor caminho
+                    visitados[proximo]=1; //marcar próximo vértice como visitado
+                    atual = proximo;
+                    nCaminhamentos++; 
+                    proximo = melhorOpcao(atual, visitados);
+                }
+            }
+      
             //ordenar tempos de caminhamentos
             for(int i=1; i<nVertices-1; i++){
                 int j=i-1;
@@ -193,17 +314,9 @@ class Grafo {
                 }
             }
 
-            //desconsiderar os k maiores caminhamentos
-            nCaminhamentos = nVertices-2 -k;
-
-            if(tempos[nCaminhamentos] == INFINITY){
-                t=-1;
-            }
-            else{
-                while(nCaminhamentos>=0){
-                    t+=tempos[nCaminhamentos];
-                    nCaminhamentos--;
-                }
+        
+            for(int i=0; i<nVertices-1-k; i++){
+                t+=tempos[i];
             }
 
             return t;
