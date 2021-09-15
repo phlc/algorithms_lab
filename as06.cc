@@ -103,9 +103,9 @@ class Grafo {
             for(int i=0; i<nVertices; i++){
                 for(int j=0; j<nVertices; j++){
                     if(matriz[i][j] == INFINITO)
-                        cout << setw(3) << -1;
+                        cout << setw(5) << -1;
                     else
-                        cout << setw(3) << matriz[i][j];
+                        cout << setw(5) << matriz[i][j];
                 }
                 cout << endl;
             }
@@ -257,7 +257,6 @@ class Grafo {
 
             //calcular número de componentes
             nComponentes = calcularComponentes(componentes);
-
             //verificar se número de teletransportes é suficiente para passsar por todos os componentes
             if(k < nComponentes-1){
                 return -1;
@@ -282,6 +281,7 @@ class Grafo {
             proximo = melhorOpcao(atual, visitados);
             while(atual != proximo){
                 tempos[nCaminhamentos] = matriz[atual][proximo]; //armazenar tempo melhor caminho
+                
                 visitados[proximo]=1; //marcar próximo vértice como visitado
                 atual = proximo;
                 nCaminhamentos++; 
@@ -289,7 +289,7 @@ class Grafo {
             }
 
             //passar pelas demais componentes
-            for(int i=1; i<nComponentes; i++){
+            for(int i=0; i<nComponentes; i++){
                 //verificar melhor vertice de inicio
                 atual = melhorInicio(i, componentes);
                 visitados[atual]=1;
@@ -303,18 +303,17 @@ class Grafo {
                     proximo = melhorOpcao(atual, visitados);
                 }
             }
-      
             //ordenar tempos de caminhamentos
             for(int i=1; i<nVertices-1; i++){
                 int j=i-1;
-                while(j>=0 && tempos[i]<tempos[j]){
-                    int buffer = tempos[i];
-                    tempos[i] = tempos[j];
+                while(j>=0 && tempos[j+1]<tempos[j]){
+                    int buffer = tempos[j+1];
+                    tempos[j+1] = tempos[j];
                     tempos[j] = buffer;
+                    j--;
                 }
             }
 
-        
             for(int i=0; i<nVertices-1-k; i++){
                 t+=tempos[i];
             }
