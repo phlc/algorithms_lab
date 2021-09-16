@@ -20,6 +20,7 @@ using namespace std;
 
 //Macros
 #define INFINITO 1000000 // peso máximo da aresta válida é 30000
+#define MAX 2147483647 // valor máximo
 
 
 /*
@@ -187,9 +188,9 @@ class Grafo {
         }
 
         /*
-        menorCaminho - Altera o grafo para constar o menor caminho entre quaisquer dois par de vértices
+        menorTodosPares - Altera o grafo para constar o menor caminho entre quaisquer dois par de vértices
         */
-        void menorCaminho(){
+        void menorTodosPares(){
             //verificar o menor caminho entre quaisquer par de vértices
             // k é o vértice referencia. Para todos vértices, cada hora um como referencia,
             //verifica-se se a distancia direta entre dois vértices i e j é maior que i-k k-j
@@ -203,27 +204,6 @@ class Grafo {
                     }
                 }
             }
-        }
-
-        /*
-        melhorOpcao - retorna o vertice nao visitado de menor custo para visitar a partir de v
-        @param int v, int* visitados -> vértice atual, arranjo de visitados
-        @return int p -> próximo vértice
-        */
-        int melhorOpcao(int v, int* visitados){
-            //declaracoes
-            int menor = INFINITO;
-            int p = v;
- 
-            //verificar menor opção não visitada
-            for(int i=0; i<nVertices; i++){
-                if(i!=v && visitados[i]==0 && matriz[v][i]< menor){
-                    //caminho de menor custo e vértice não visitado encontrado
-                    menor = matriz[v][i];
-                    p = i;
-                }
-            }
-            return p;
         }
 
         /*
@@ -262,138 +242,127 @@ class Grafo {
         }
 
         /*
-        melhorInicio - Em um componente sem vértice de início pré-determinado, escolher o que gera menor tempo
-        @param int c, int* comp -> número do componente, arranjo com o controle de vertices/componente
-        @return int v -> melhor vértice de início
+        testarCaminhos - Testa recursivamente os caminhos para descobrir o menor
+        @param int* visitados, int atual, int level -> arranjo para controle dos visitados, vértice atual
+        @return Pilha* -> ponteiro para pilha com os melhores caminhamentos e tempo total
         */
-        int melhorInicio(int c, int* comp){
-            int v = -1;
-            int tempo = INFINITO;
-            int atual = -1;
-            int proximo = -1;
+        Pilha* testarCaminhos(int* visitados, int atual){
+            Pilha* tempos[nVertices]; //armazenamento das listas retornadas
+            int controle = 0;
 
-
-            //testar todos os vértices do componente
+            //inicialização
             for(int i=0; i<nVertices; i++){
-                int t = 0;
-                if(comp[i] == c){            
-                    int visit[nVertices]; //controle vértices visitados local
-                    //inicialização
-                    for(int j=0; j<nVertices; j++){
-                        visit[j] = 0;
-                    }
-                    atual = i;
-                    visit[atual] = 1;
-                    proximo = melhorOpcao(i, visit);
-                    while(atual != proximo){
+                tempos[i] = NULL;
+            }
 
-                        t+= matriz[atual][proximo]; //armazenar tempo melhor caminho
-                        visit[proximo]=1; //marcar próximo vértice como visitado
-                        atual = proximo;
-                        proximo = melhorOpcao(atual, visit);
-                    }
-                    //se t melhor que tempo
-                    if(t<tempo){
-                        tempo = t;
-                        v = i;
-                    }
+            //chamar recursivamente demais
+            for(int i=0; i<nVertices; i++){
+                if(visitados[i]==0){
+                    visitados[i] = 1;
+                    tempos[i] = testarCaminhos(visitados, i);
+                    tempos[i]->inserir(matriz[atual][i]);
+                    visitados[i] = 0;
+                    controle = 1;
                 }
             }
-            return v;
+
+            //se não há mais vértices final da recursão
+            if(controle == 0){
+                return (new Pilha());
+            }
+
+            //verificar a melhor opção
+            int melhor = -1;
+            int melhorTempo = MAX;
+            for(int i=0; i<nVertices; i++){
+                if(tempos[i]!=NULL && melhorTempo > tempos[i]->soma){
+                    melhor = i;
+                    melhorTempo = tempos[i]->soma;
+                }
+            }
+
+            return tempos[melhor];
         }
 
         /*
-        caminharPorTodos - Tenta caminhar por todos os vértices do grafo
+        testarCaminhos - Testa recursivamente os caminhos para descobrir o menor
+        @return Pilha* -> ponteiro para pilha com os melhores caminhamentos e tempo total
+        */
+        Pilha* testarCaminhos(){
+            Pilha* resp;
+            int visitados[nVertices]; //controle vértices visitados
+            Pilha* tempos[nVertices]; //armazenamento das listas retornadas
+
+            //inicialização
+            for(int i=0; i<nVertices; i++){
+                visitados[i] = 0;
+                tempos[i] = NULL;
+            }
+
+            //começar vértice 1
+            visitados[0] = 1;
+
+            //chamar recursivamente demais
+            for(int i=1; i<nVertices; i++){
+                if(visitados[i]==0){
+                    visitados[i] = 1;
+                    tempos[i] = testarCaminhos(visitados, i);
+                    tempos[i]->inserir(matriz[0][i]); //começar do vértice 1
+                    visitados[i] = 0;
+                }
+            }
+
+            //verificar a melhor opção
+            int melhor = -1;
+            int melhorTempo = MAX;
+            for(int i=0; i<nVertices; i++){
+                if(tempos[i]!=NULL && melhorTempo > tempos[i]->soma){
+                    melhor = i;
+                    melhorTempo = tempos[i]->soma;
+                }
+            }
+
+            return tempos[melhor];
+        }
+
+        /*
+        tempoOtimo - Descobre o menor tempo para caminhar por todos os vértices do grafo
         @param int k -> k sendo o número de teletransportes
         @return int t -> t sendo o tempo total gasto para caminhar ou -1 se impossível
         */
-        int caminharPorTodos (int k){
+        int tempoOtimo(int k){
             //declaracoes
             int t = 0;
-            int atual = 0;
-            int proximo = 0;
             int nComponentes = 0;
-            int nCaminhamentos = 0;
-            int visitados[nVertices]; //controle vértices visitados
             int componentes[nVertices]; //controle componentes desconexos
-            int tempos[nVertices-1];
 
             //inicialização
-            visitados[0] = 1;
-            componentes[0] = -1; 
-            for(int i=1; i<nVertices; i++){
-                visitados[i] = 0;
+            for(int i=0; i<nVertices; i++){
                 componentes[i] = -1;
-                tempos[i-1] = 0;
+            }
+            
+            //verificar se número de teletransportes é suficiente para passsar por todos os vértices sem caminhar
+            if(nVertices-1 <= k){
+                return 0;
             }
 
             //alterar grafo para menor caminho entre quaisquer dos dois vértices
-            this->menorCaminho();
+            this->menorTodosPares();
 
             //calcular número de componentes
             nComponentes = calcularComponentes(componentes);
-            //verificar se número de teletransportes é suficiente para passsar por todos os componentes
+            //verificar se o número de teletransportes é insuficiente para conectar todos componentes desconexos
             if(k < nComponentes-1){
                 return -1;
             }
-            else{
-                k = k -nComponentes +1; //descontar os teletransportes necessários para pular entre componentes
-                nCaminhamentos = nCaminhamentos +nComponentes -1; //considerar os teletransportes como caminhamentos
+
+            Pilha* tempos = testarCaminhos();
+
+            for(int i=0; i<k; i++){
+                tempos->remover();
             }
 
-            //criar vetor como o número de vértices de cada componente
-            int verticesPorComponente[nComponentes];
-            for(int i=0; i<nComponentes; i++){
-                verticesPorComponente[i] = 0;
-                for(int j=0; j<nVertices; j++){
-                    if(componentes[j] == i){
-                        verticesPorComponente[i]++;
-                    }
-                }
-            }
-
-            //verificar melhor caminho dentro da componente 0 (vértice inicial pré-determinado)
-            proximo = melhorOpcao(atual, visitados);
-            while(atual != proximo){
-                tempos[nCaminhamentos] = matriz[atual][proximo]; //armazenar tempo melhor caminho
-                
-                visitados[proximo]=1; //marcar próximo vértice como visitado
-                atual = proximo;
-                nCaminhamentos++; 
-                proximo = melhorOpcao(atual, visitados);
-            }
-
-            //passar pelas demais componentes
-            for(int i=0; i<nComponentes; i++){
-                //verificar melhor vertice de inicio
-                atual = melhorInicio(i, componentes);
-                visitados[atual]=1;
-                //verificar melhor caminho dentro da componente 0 (vértice inicial pré-determinado)
-                proximo = melhorOpcao(atual, visitados);
-                while(atual != proximo){
-                    tempos[nCaminhamentos] = matriz[atual][proximo]; //armazenar tempo melhor caminho
-                    visitados[proximo]=1; //marcar próximo vértice como visitado
-                    atual = proximo;
-                    nCaminhamentos++; 
-                    proximo = melhorOpcao(atual, visitados);
-                }
-            }
-            //ordenar tempos de caminhamentos
-            for(int i=1; i<nVertices-1; i++){
-                int j=i-1;
-                while(j>=0 && tempos[j+1]<tempos[j]){
-                    int buffer = tempos[j+1];
-                    tempos[j+1] = tempos[j];
-                    tempos[j] = buffer;
-                    j--;
-                }
-            }
-
-            for(int i=0; i<nVertices-1-k; i++){
-                t+=tempos[i];
-            }
-
-            return t;
+            return tempos->soma;
         }
 
 };
@@ -431,7 +400,7 @@ int main(){
         }
         
         
-        cout << g.caminharPorTodos(k) << endl;
+        cout << g.tempoOtimo(k) << endl;
     }
 
     //return
