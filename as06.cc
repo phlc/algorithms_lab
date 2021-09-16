@@ -7,7 +7,11 @@ Matricula: 651230
 AS06
 
 Análise:
-        
+        Operação de maior custo do algoritimo é O(n^3), sendo n o número de vértices. É realizada pelo
+        método menorCaminho(), que altera o grafo para constar uma aresta entre quaisquer dois pares
+        de vértices. Se há componentes desconexos, a aresta criada entre um componente e outro recebe o 
+        valor de INFINITO. Há vários outros métodos da ordem de O(n^2) e O(n), mas que não alteram a 
+        complexidade do algoritimo.
         
 */
 
