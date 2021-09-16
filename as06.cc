@@ -7,11 +7,7 @@ Matricula: 651230
 AS06
 
 Análise:
-        Operação de maior custo do algoritimo é O(n^3), sendo n o número de vértices. É realizada pelo
-        método menorCaminho(), que altera o grafo para constar uma aresta entre quaisquer dois pares
-        de vértices. Se há componentes desconexos, a aresta criada entre um componente e outro recebe o 
-        valor de INFINITO. Há vários outros métodos da ordem de O(n^2) e O(n), mas que não alteram a 
-        complexidade do algoritimo.
+        
         
 */
 
@@ -22,6 +18,84 @@ Análise:
 //Namespace
 using namespace std;
 
+//Macros
+#define INFINITO 1000000 // peso máximo da aresta válida é 30000
+
+
+/*
+No - Classe nó para criação de um nó para uma pilha de alocação dinâmica
+*/
+class No {
+public:  
+    //Atributos
+    int t; //tempo
+    No* prox; //próximo nó
+
+    //Construtor
+    No(int v){
+        t = v;
+        prox = NULL;
+    }
+};
+
+/*
+Pilha - Classe para uma "pilha ordenada" para organização dos nós
+*/
+class Pilha{
+public:
+    //Atributos
+    No* inicio;
+    int soma;
+
+    //Construtor
+    Pilha(){
+        inicio = new No(INFINITO); // nó cabeça
+        soma = 0;
+    }
+
+    /*
+    inserir - insere um novo valor na Pilha mantendo ordenada de forma decrescente
+    @param int v -> novo valor
+    */
+    void inserir(int v){
+        No* novo = new No(v);
+        No* i=inicio;
+        for(; i->prox!=NULL && i->prox->t > novo->t; i=i->prox)
+        ;
+        No* buffer = i->prox;
+        i->prox = novo;
+        novo->prox = buffer;
+
+        soma = soma + v;
+    }
+
+    /*
+    remover - remove o topo da Pilha
+    @return int v -> valor do nó removido ou -1 se pilha vazia
+    */
+    int remover(){
+        if(inicio->prox == NULL)
+            return -1;
+        else{
+            No* buffer = inicio->prox;
+            inicio->prox = inicio->prox->prox;
+            soma = soma - buffer->t;
+
+            return (buffer->t);
+        }
+    }
+
+    /*
+    mostrar - mostra os valores da pilha
+    */
+    void mostrar(){
+        for(No* i=inicio; i!=NULL; i=i->prox){
+            cout << i->t << " ";
+        }
+        cout << endl;
+    }
+};
+
 
 /*
 Grafo - Classe para grafo simples com aresta valorada
@@ -31,9 +105,6 @@ matrir(x,y) > 0 -> aresta existente, peso aresta(x,y) = matriz[x][y], max 30000
 
 */
 class Grafo {
-    //Macros
-    #define INFINITO 1000000 // peso máximo da aresta válida é 30000
-
     //Atributos
     private:
         int nVertices; //número de vértices
@@ -358,7 +429,8 @@ int main(){
             cin >> valor;
             g.inserir(v1, v2, valor);
         }
-
+        
+        
         cout << g.caminharPorTodos(k) << endl;
     }
 
