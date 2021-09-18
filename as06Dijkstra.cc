@@ -382,6 +382,7 @@ class Grafo {
                     }
                 }
                 c = tempos->remover();
+cout << "soma: " << c->soma << endl;
             }
 
             return c;
