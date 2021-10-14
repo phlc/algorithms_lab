@@ -75,27 +75,52 @@ int main(){
             max[i] = 0;
         }
 
+        
         //inicializar posição inicial de Rafael no tempo 0
         cin >> x[0];
         cin >> y[0];
         t[0] = 0;
         
-        
+        //passar por todas maças em ordem de tempo
+        for(int i=1; i<=quantidade; i++){
+            int maior, xMaior, yMaior, tMaior;
+
+            //inicializar com base em t=0
+            maior = 0;
+            xMaior = x[0];
+            yMaior = y[0];
+            tMaior = 0;
+
+            //verificar qual memória pretérita alcançável é maior
+            for(int j=i-1; j>=0; j--){
+                //verificar se a posicao i é alcançável pela posição j
+                if((t[i]-t[j]) - distancia(x[i],y[i], x[j],y[j]) >= 0){
+                    //se maçã i, faz parte da solução
+                    if(maior < max[j]+1){
+                        maior = max[j]+1;
+                        xMaior = x[i];
+                        yMaior = y[i];
+                        tMaior = t[i];
+                    }
+                }
+                
+            }
+            //atualizar memória do momento i para melhor opção
+            max[i] = maior;
+            x[i] = xMaior;
+            y[i] = yMaior;
+            t[i] = tMaior;
+        }
+
+
         //mostrar quantidade
- //       cout << max[quantidade] << endl;
+        cout << max[quantidade] << endl;
         
         //ler próxima entrada
         cin >> linhas;
         cin >> colunas;
         cin >> quantidade;
     }
-
-    cout << distancia(1, 1, 2, 2) << endl;
-    cout << distancia(1, 7, 8, 2) << endl;
-    cout << distancia(4, 2, 2, 9) << endl;
-    cout << distancia(1, 10, 2, 5) << endl;
-    cout << distancia(9, 1, 8, 3) << endl;
-    cout << distancia(5, 7, 3, 8) << endl;
 
     //return
     return 0;   
