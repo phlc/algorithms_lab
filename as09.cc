@@ -9,10 +9,10 @@ AS09
 Análise:
          O algoritmo parte da posição inicial do Rafael, com 0 maçãs e a cada nova maçã a memória com os melhores
          resultados das maçãs anteriores são reavaliados para verificar se a nova maça entre ou não no resultado.
-         A verificação é feita dentro do "for" duplo, sendo o externo de 1 -> quantidade de maçãs e i o externo de 
+         A verificação é feita dentro do "for" duplo, sendo o externo de 1 -> quantidade de maçãs e o interno de 
          (i-1) -> 0. Ou seja, na primeira iteração do "for" externo, o interno é chamado 1 vez, na segunda 2, ...,
          na enésima vez, "n" vezes, sendo "n" a quantidade de maçãs, totalizando aproximadamente (n*(n-1)/2).
-         Assim, o algoritmo tem complexidade O(n^2), sendo n a quantidade de maçãs.
+         Assim, o algoritmo tem complexidade O(n^2), sendo "n" a quantidade de maçãs.
 */
 
 
