@@ -30,8 +30,9 @@ distancia - calcula a distancia entre dois pontos na matriz
 int distancia(int x1, int y1, int x2, int y2){
     int dist = 0;
 
-    //ate que 
+    //ate que um ponto chegue no outro
     while(x1!=x2 || y1!=y2){
+        //Obs: se 2 incrementos = andar na diagonal
         if(x1<x2)
             x1++;
         else if(x2<x1)
@@ -42,6 +43,7 @@ int distancia(int x1, int y1, int x2, int y2){
         else if(y2<y1)
             y2++;
 
+        //atualizar distancia
         dist++;
     }
 
@@ -64,10 +66,10 @@ int main(){
     //repetir até entrada com 0s
     while(linhas || colunas || quantidade){
         //Declaracoes
-        int x[quantidade+1]; //x[0] -> linha da posição inicial Rafael. x[i] -> linha da maçã i, i>0.
-        int y[quantidade+1]; //y[0] -> coluna da posição inicial Rafael. y[i] -> coluna da maçã i, i>0.
-        int t[quantidade+1]; //t[0] -> tempo 0 Rafael. t[i] -> tempo da maçã i, i>0.
-        int max[quantidade+1]; //max[i] -> maximo possivel de maçãs coletadas após lançamento maçã i
+        int x[quantidade+1]; // x[0] -> linha da posição inicial Rafael. x[i] -> linha da maçã i, i>0.
+        int y[quantidade+1]; // y[0] -> coluna da posição inicial Rafael. y[i] -> coluna da maçã i, i>0.
+        int t[quantidade+1]; // t[0] -> tempo 0 Rafael. t[i] -> tempo da maçã i, i>0.
+        int max[quantidade+1]; // max[i] -> maximo possivel de maçãs coletadas considerando lançamento maçã i
         int resposta = 0;
 
         //inicializar max[0]
@@ -117,7 +119,7 @@ int main(){
             y[i] = yMaior;
             t[i] = tMaior;
 
-            //atualizar resposta
+            //atualizar resposta para a maior
             if(resposta < maior){
                 resposta = maior;
             }
