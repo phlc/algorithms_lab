@@ -7,7 +7,12 @@ Matricula: 651230
 AS09
 
 Análise:
-         
+         O algoritmo parte da posição inicial do Rafael, com 0 maçãs e a cada nova maçã a memória com os melhores
+         resultados das maçãs anteriores são reavaliados para verificar se a nova maça entre ou não no resultado.
+         A verificação é feita dentro do "for" duplo, sendo o externo de 1 -> quantidade de maçãs e i o externo de 
+         (i-1) -> 0. Ou seja, na primeira iteração do "for" externo, o interno é chamado 1 vez, na segunda 2, ...,
+         na enésima vez, "n" vezes, sendo "n" a quantidade de maçãs, totalizando aproximadamente (n*(n-1)/2).
+         Assim, o algoritmo tem complexidade O(n^2), sendo n a quantidade de maçãs.
 */
 
 
@@ -63,6 +68,7 @@ int main(){
         int y[quantidade+1]; //y[0] -> coluna da posição inicial Rafael. y[i] -> coluna da maçã i, i>0.
         int t[quantidade+1]; //t[0] -> tempo 0 Rafael. t[i] -> tempo da maçã i, i>0.
         int max[quantidade+1]; //max[i] -> maximo possivel de maçãs coletadas após lançamento maçã i
+        int resposta = 0;
 
         //inicializar max[0]
         max[0] = 0;
@@ -110,11 +116,16 @@ int main(){
             x[i] = xMaior;
             y[i] = yMaior;
             t[i] = tMaior;
+
+            //atualizar resposta
+            if(resposta < maior){
+                resposta = maior;
+            }
         }
 
 
         //mostrar quantidade
-        cout << max[quantidade] << endl;
+        cout << resposta << endl;
         
         //ler próxima entrada
         cin >> linhas;
