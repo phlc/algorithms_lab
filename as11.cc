@@ -18,6 +18,9 @@ Análise:
 //Namespace
 using namespace std;
 
+//Matriz Global
+//tabuleiro[Linhas][Colunas]
+char** tabuleiro;
 
 /*
 Main
@@ -31,16 +34,30 @@ int main(){
 
     //repetir até EOF
     while(linhas ||  colunas || peoes){
-        char buffer;
+        //alocar espaço para o tabuleiro
+        tabuleiro = new char*[linhas];
+        for(int i=0; i<linhas; i++){
+            tabuleiro[i] =  new char[colunas];
+            for(int j=0; j<colunas; j++){
+                char buffer;
+                cin >> buffer;
+                tabuleiro[i][j] = buffer;
+            }
+        }
 
         for(int i=0; i<linhas; i++){
             for(int j=0; j<colunas; j++){
-                cin >> buffer;
-                cout << buffer;
+                cout << tabuleiro[i][j];
             }
             cout << endl;
         }
         cout << endl;
+
+        //delete
+        for(int i=0; i<linhas; i++){
+            delete[] tabuleiro[i];
+        }
+        delete[] tabuleiro;
 
         //ler próxima quantidade de linhas, colunas e peoes
         cin >> linhas >> colunas >> peoes;
