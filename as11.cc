@@ -33,6 +33,71 @@ int estados[16][1<<16];
 int mapaVertices[1<<16];
 
 
+/*menorDistancia - Armazenda no grafo a menor distancia entre as peças por busca em largura
+@param int** matriz; int tamanho -> grafo do tabuleiro, tamanho da matriz
+*/
+void menorDistancia(int** matriz, int tamanho){
+    //comecar em todos os vértices
+    for(int i=0; i<nVertices; i++){
+
+        //declarcoes locais
+        int v = mapaVertices[1<<i];
+        int pecasVisitadas = 1;
+        int atual = v;
+        int inicioFila = 0;
+        int fimFila = 0;
+        int pais[tamanho];
+        int fila[tamanho];
+        int visitados[tamanho];
+
+        //inicializacao
+        for(int j=0; j<tamanho; j++){
+            pais[j] = j;
+            fila[j] = -1;
+            visitados[j] = -1;
+        }
+
+        //marcar v como visitado
+        visitados[v] = 0;
+
+        //fazer busca em largura por todas as pecas
+        fila[fimFila++] = atual;
+        while(pecasVisitadas != nVertices && inicioFila!=fimFila){
+            //retirar vertice da fila
+            atual = fila[inicioFila++];
+
+            //verificar vértices adjacentes
+            for(int j=0; j<tamanho; j++){
+                if(atual!=j && matriz[atual][j] == 1 && visitados[j]==-1){
+                    pais[j] = atual;
+                    visitados[j]=1; //atualizar com a distancia
+                    fila[fimFila++] = j;
+                    //Se posicao tiver uma peça
+                    if(matriz[j][j]==2){
+                        pecasVisitadas++;
+                    }
+                }
+            }   
+        }
+        //verificar distancia de cada peca ate v
+        for(int j=0; j<nVertices; j++){
+            //declaracoes locais
+            int filho = mapaVertices[1<<j];
+            atual = filho;
+            int distancia = 0;
+
+            //subir nos pais até v
+            while(atual != v){
+                distancia += 1;
+                atual = pais[atual];
+            }
+            matriz[v][filho] = matriz[filho][v] = distancia;
+        }
+
+    }
+    
+}
+
 /*
 percorrerEstados - utiliza o arranjo de estados para manter o histórico dos os estados
 parte do estado com 1 vértice, até quando todos estão visitados. Utilizando o estado anterior para montar o próximo
@@ -119,15 +184,15 @@ int main(){
                 //posicao tiver um peao
                 if(entrada == 'P'){
                     mapaVertices[indice] = v; 
-                    matriz[v][v] = 1; //posicao tabuleiro valida
+                    matriz[v][v] = 2; //peça em posicao tabuleiro valida
                     indice = indice<<1;
                 }
                 else if(entrada == 'C'){
                     mapaVertices[1] = v;
-                    matriz[v][v] = 1; //posicao tabuleiro valida  
+                    matriz[v][v] = 2; //peça em posicao tabuleiro valida  
                 }
                 else if(entrada == '.'){
-                    matriz[v][v] = 1; //posicao tabuleiro valida  
+                    matriz[v][v] = 1; //posicao tabuleiro valida  sem peça
                 }
                 else if(entrada == '#'){
                     matriz[v][v] = 0; //posicao tabuleiro INvalida
@@ -197,28 +262,20 @@ int main(){
         }
         
 
-        //Inicialização variáveis globais
+        //Inicialização variáveis globais para menorDistancia
+        nVertices = peoes+1; //número de vértices
+        fim = (1<<(peoes+1)) - 1; //máscara todos os bits 1
+        
+        // Obter menor distância entre as peças do tabuleiro
+        menorDistancia(matriz, tamanho);
+
+        //inicializar variáveis globais para percorrerEstados
         for(int a = 0; a < 16; a++){
             for(int b = 0; b < 1<<16; b++){
                 estados[a][b] = -1;
             }
         }
-        
-        
-        nVertices = peoes+1; //número de vértices
-        fim = (1<<(peoes+1)) - 1; //máscara todos os bits 1
-        
-        // Floyd-Warshall
-        for(int a=0; a<tamanho; a++){
-            for(int b=0; b<tamanho; b++){
-                for(int c=0; c<tamanho; c++){
-                    if(matriz[b][c] > (matriz[b][a] + matriz[a][c])){
-                        matriz[b][c] = matriz[b][a] + matriz[a][c];
-                    }
-                }
-            }
-        }
-    
+
         //iniciar percuso dos estados a partir do local do cavalo, vértice do cavalo como visitado.
         cout << percorrerEstados(matriz, 0, 1) << endl;
 
