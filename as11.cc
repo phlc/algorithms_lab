@@ -7,7 +7,16 @@ Matricula: 651230
 AS11
 
 Análise:
-        
+        O algoritmo cria um grafo representativo de todas as posições do tabuleiro. Assim, em um tabuleiro com "n" posições
+        n = linhas x colunas. A criação do grafo custa O(n).
+        Em mapaVertice ficam armazenadas as posicoes de cada peça(pela especificação do problema <=16).
+        Para encontrar a menorDistancia() entre todas as peças, sao realizadas <=16 buscas em larguras no grafo de tamanho n, 
+        para encontrar o menor caminho de cada peça em relação às demais. Nesse caso temos <=16 buscas a um custo O(n),
+        ou seja, O(n).
+        Após, percorrerEstados() executa o algoritmo de programação dinâmica do caixeiro viajante para encontrar a menor
+        rota que passa por todas as peças e retorna para o cavalo. A complexidade do caixeiro viajante é O(n^2*2^n), mas por
+        restrições do enunciado, nesse caso n, o número de peças, está limitado a <=16.
+
 */
 
 //Dependencias
@@ -278,6 +287,12 @@ int main(){
 
         //iniciar percuso dos estados a partir do local do cavalo, vértice do cavalo como visitado.
         cout << percorrerEstados(matriz, 0, 1) << endl;
+
+        //liberar memoria
+        for(int i=0; i<tamanho; i++){
+            delete[] matriz[i];
+        }
+        delete[] matriz;
 
         //ler número de linhas, colunas e peoes
         cin >> linhas >> colunas >> peoes;
